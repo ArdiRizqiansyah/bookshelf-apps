@@ -1,5 +1,14 @@
 const books = [];
+const STORAGE_KEY = 'books';
 const RENDER_EVENT = 'render-book';
+
+function isStorageExist() {
+  if (typeof Storage === undefined) {
+    alert("Browser kamu tidak mendukung local storage");
+    return false;
+  }
+  return true;
+}
 
 function generateId() {
 	return +new Date();
@@ -86,7 +95,16 @@ function addBook(){
     const bookObject = generateBookObject(generatedId, judul, penulis, tahun, baca);
     books.push(bookObject);
 
+    saveData();
+
     document.dispatchEvent(new Event(RENDER_EVENT));
+}
+
+function saveData(){
+    if (isStorageExist()) {
+        const parsed = JSON.stringify(books);
+        localStorage.setItem(STORAGE_KEY, parsed);
+    }
 }
 
 function updateStatusBook(bookId){
@@ -96,6 +114,8 @@ function updateStatusBook(bookId){
 
     let statusUpdate = bookTarget.baca == true ? false : true;
     bookTarget.baca = statusUpdate;
+
+    saveData();
     
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
@@ -106,6 +126,8 @@ function removeBooks(bookId){
     if (bookTarget == null) return;
 
     books.splice(bookTarget, 1);
+
+    saveData();
 
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
@@ -123,7 +145,24 @@ document.addEventListener('DOMContentLoaded', function () {
         event.preventDefault();
         addBook();
     });
+
+    if (isStorageExist()) {
+      loadDataFromStorage();
+    }
 });
+
+function loadDataFromStorage() {
+  const serializedData = localStorage.getItem(STORAGE_KEY);
+  let data = JSON.parse(serializedData);
+
+  if (data !== null) {
+    for (const book of data) {
+      books.push(book);
+    }
+  }
+
+  document.dispatchEvent(new Event(RENDER_EVENT));
+}
 
 document.addEventListener(RENDER_EVENT, function () {
     const complateBookList = document.querySelector("#completeBookshelfList");
@@ -135,10 +174,12 @@ document.addEventListener(RENDER_EVENT, function () {
     for (const bookItem of books){
         const bookElement = makeBook(bookItem);
 
-        if(bookItem.baca){
-            complateBookList.appendChild(bookElement);
-        }else{
-            incomplateBookList.appendChild(bookElement);
+        if(bookElement != undefined){
+            if (bookItem.baca) {
+              complateBookList.appendChild(bookElement);
+            } else {
+              incomplateBookList.appendChild(bookElement);
+            }
         }
     }
 });
@@ -148,15 +189,16 @@ document.getElementById('searchSubmit').addEventListener("click", function (even
     const searchBook = document.getElementById('searchBookTitle').value.toLowerCase();
     
     const bookList = document.querySelectorAll('.book_item > h3');
-        for (buku of bookList) {
-            if (searchBook == '') {
-                buku.parentElement.style.display = "block";
-            }else if(searchBook !== buku.innerText.toLowerCase()){
-                buku.parentElement.style.display = "none";
-            }else{
-                buku.parentElement.style.display = "block";
-            }
+
+    for (buku of bookList) {
+        if (searchBook == '') {
+            buku.parentElement.style.display = "block";
+        }else if(searchBook !== buku.innerText.toLowerCase()){
+            buku.parentElement.style.display = "none";
+        }else{
+            buku.parentElement.style.display = "block";
         }
+    }
 });
 
 // update book
@@ -174,7 +216,12 @@ function showEditBook(bookId){
 
     updateForm.addEventListener("submit", function (event) {
         event.preventDefault();
-        updateBook(bookId);
+
+        if(event.handled !== true){
+            event.handled = true;
+            updateBook(bookId);
+        }
+
     });
 }
 
@@ -185,7 +232,7 @@ function updateBook(bookId){
     const judul = document.getElementById("editBookTitle").value;
     const penulis = document.getElementById("editBookAuthor").value;
     const tahun = document.getElementById("editBookYear").value;
-    const baca = document.getElementById("editBookIsComplate").checked == 'on' ? true : false;
+    const baca = document.getElementById("editBookIsComplate").checked;
 
     bookUpdate.judul = judul;
     bookUpdate.penulis = penulis;
@@ -195,6 +242,8 @@ function updateBook(bookId){
     modal.style.display = "none";
 
     alert("Buku berhasil di update");
+
+    saveData();
 
     document.dispatchEvent(new Event(RENDER_EVENT));
 }
