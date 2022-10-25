@@ -49,9 +49,6 @@ function makeBook(bookObject){
     const complateBookList = document.querySelector("#completeBookshelfList");
     const incomplateBookList = document.querySelector("#incompleteBookshelfList");
 
-    complateBookList.innerHTML = '';
-    incomplateBookList.innerHTML = '';
-
         
     let article = document.createElement('article');
 
