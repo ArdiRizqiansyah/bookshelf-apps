@@ -120,9 +120,11 @@ function updateStatusBook(bookId){
 function removeBooks(bookId){
     let bookTarget = findBook(bookId);
 
+    let index = books.indexOf(bookTarget);
+
     if (bookTarget == null) return;
 
-    books.splice(bookTarget, 1);
+    books.splice(index, 1);
 
     saveData();
 
