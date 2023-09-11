@@ -65,8 +65,8 @@ function makeBook(bookObject){
 
                                 <button class="green" id="${id}" onclick=updateStatusBook(${id})> ${
                                     baca == true
-                                    ? "Selesai dibaca"
-                                    : "Belum selesai di Baca"
+                                    ? "Pindah ke belum dibaca"
+                                    : "Pindah ke selesei dibaca"
                                 } </button>
 
                                 <button class="red" onclick="confirmDeleteBook(${id})">Hapus buku</button>
@@ -105,6 +105,7 @@ function saveData(){
 }
 
 function updateStatusBook(bookId){
+    console.log(bookId);
     let bookTarget = findBook(bookId);
 
     if (bookTarget == null) return;
@@ -218,7 +219,7 @@ function showEditBook(bookId){
 
         if(event.handled !== true){
             event.handled = true;
-            updateBook(bookId);
+            updateBook(bookId)
         }
 
     });
@@ -233,6 +234,7 @@ function updateBook(bookId){
     const tahun = document.getElementById("editBookYear").value;
     const baca = document.getElementById("editBookIsComplate").checked;
 
+    // update data
     bookUpdate.judul = judul;
     bookUpdate.penulis = penulis;
     bookUpdate.tahun = tahun;
